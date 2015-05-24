@@ -1,0 +1,128 @@
+<form>
+  <label>BBG Attributes Search and BBG vs House Prices Comparison</label>
+  <description></description>
+  <!-- Bloomberg Lookup -->
+  <fieldset submitButton="true" autoRun="false">
+    <!-- New in Splunk 6.1 use the multiselect input -->
+    <input type="time">
+      <label></label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="multiselect" token="ID_ISIN" searchWhenChanged="false">
+      <label>ISIN</label>
+      <!-- The final value will be surrounded by prefix and suffix -->
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <!-- Each value will be surrounded by the valuePrefix and valueSuffix -->
+      <valuePrefix>ID_ISIN="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <!-- All the values and their valuePrefix and valueSuffix will be concatenated together with the delimiter between them -->
+      <delimiter> OR </delimiter>
+      <choice value="*">ALL</choice>
+    
+      <search>
+        <query>index=* sourcetype=New_All_Converts | search ID_ISIN=* |  table ID_ISIN | dedup ID_ISIN</query>
+        <earliest>0</earliest>
+      </search>
+      <fieldForLabel>ID_ISIN</fieldForLabel>
+      <fieldForValue>ID_ISIN</fieldForValue>
+    </input>
+    <input type="text" token="txt_cusip" searchWhenChanged="false">
+      <label>CUSIP ID</label>
+    </input>
+    <input type="text" token="txt_bbid" searchWhenChanged="false">
+      <label>BBG ID</label>
+    </input>
+    <input type="time" token="txt_lastupdatedate" searchWhenChanged="false">
+      <label>Enter Last Update Date</label>
+      <default>
+        <earliest>1420070400</earliest>
+        <latest>1431100800</latest>
+      </default>
+    </input>
+  </fieldset>
+  <!--House Prices-->
+  <row>
+    <panel>
+      <title>Bloomberg Lookup</title>
+      <table>
+        <title>Bloomberg Lookup</title>
+        <search>
+          <!--OR LAST_UPDATE_DATE="$txt_lastupdatedate$"-->
+          <query>index=* sourcetype=New_All_Converts $ID_ISIN$ OR [ |stats count | eval ID_CUSIP="$txt_cusip$" | makemv delim="," ID_CUSIP | fields ID_CUSIP | format] OR [ |stats count | eval ID_UNIQUE_BBG="$txt_bbid$" | makemv delim="," ID_UNIQUE_BBG | fields ID_UNIQUE_BBG | format] | table ID_CUSIP ID_ISIN ID_UNIQUE_BBG LAST_UPDATE_DATE PX_BID PX_ASK</query>
+          <earliest>$txt_lastupdatedate.earliest$</earliest>
+          <latest>$txt_lastupdatedate.latest$</latest>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">10</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">false</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.wrap">1</option>
+        <!-- <option name="type">raw</option> -->
+        <option name="wrap">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+    <panel>
+      <title>BBG vs House Prices</title>
+      <table>
+        <title>BBG vs House Prices</title>
+        <search>
+          <!--[ |stats count | eval ID_CUSIP="$txt_cusip$" | makemv delim="," ID_CUSIP | fields ID_CUSIP | format]-->
+          <query>sourcetype="new_all_converts" OR sourcetype="sourcetype_hp_out" | search [ |stats count | eval ID_CUSIP="$txt_cusip$" | makemv delim="," ID_CUSIP | fields ID_CUSIP | format] | transaction ID_CUSIP LAST_UPDATE_DATE | table ID_CUSIP LAST_UPDATE_DATE PX_BID HP_PX_BID</query>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">10</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">false</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.wrap">1</option>
+        <option name="type">raw</option>
+        <option name="wrap">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>sourcetype="new_all_converts" OR sourcetype="sourcetype_hp_out" | search [ |stats count | eval ID_CUSIP="$txt_cusip$" | makemv delim="," ID_CUSIP | fields ID_CUSIP | format] | transaction ID_CUSIP LAST_UPDATE_DATE | table LAST_UPDATE_DATE PX_BID HP_PX_BID</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>

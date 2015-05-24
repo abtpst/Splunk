@@ -1,0 +1,42 @@
+<form>
+  <label>House Price Lookup</label>
+  <description></description>
+  <!--House Prices-->
+  <fieldset submitButton="true" autoRun="false">
+    <!-- New in Splunk 6.1 use the multiselect input -->
+    <input type="time">
+      <label></label>
+      <default>
+        <earliest>0</earliest>
+        <latest></latest>
+      </default>
+    </input>
+    <input type="text" token="house_txt_cusip" searchWhenChanged="false">
+      <label>CUSIP (use , for multiple)</label>
+    </input>
+    <br></br>
+  </fieldset>
+  <row>
+    <panel>
+      <title>House Price Lookup</title>
+      <table>
+        <title>House Price Lookup</title>
+        <search>
+          <query>sourcetype="new_all_converts" OR sourcetype="sourcetype_hp_out" | search [ |stats count | eval ID_CUSIP="$house_txt_cusip$" | makemv delim="," ID_CUSIP | fields ID_CUSIP | format] | transaction ID_CUSIP | table ID_CUSIP LAST_UPDATE_DATE PX_BID HP_PX_BID</query>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">10</option>
+        <option name="raw.drilldown">full</option>
+        <option name="rowNumbers">false</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.wrap">1</option>
+        <option name="type">raw</option>
+        <option name="wrap">true</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+</form>
