@@ -3,7 +3,5 @@
 
 ^([^\|]+\|){XX}(?P<PX_BID>\d+\.\d+)([^\|]+\|){YY}(?P<PX_ASK>\d+\.\d+)
 
-
-
 //Example of extracting a single field.
 ^([^\|]+\|){ZZ}(?P<ID_CUSIP>\w+)\|
